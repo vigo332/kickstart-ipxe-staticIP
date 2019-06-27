@@ -1,0 +1,31 @@
+#!ipxe
+
+echo Setting up the network interfaces
+ifopen
+
+echo Setting eth0 on the first network interface
+set net0/ip 192.168.56.155
+set net0/netmask 255.255.255.0
+set net0/gateway 192.168.56.254
+
+ifstat
+
+echo Printing the routing table
+route
+
+echo Downloading image and kernel for chainloading from http://192.168.54.1/ftp/tree/isolinux
+
+initrd http://192.168.54.1/ftp/tree/isolinux/initrd.img
+kernel http://192.168.54.1/ftp/tree/isolinux/vmlinuz \
+    initrd=initrd.img \
+    inst.ks=http://192.168.54.1/ftp/ks_files/192.168.56.155.ks.cfg \
+    ip=192.168.56.155::192.168.56.254:255.255.255.0:myws155:ens4f0:none:8192 \
+    ifname=eth0:AB:CD:EF:12:34:56 \
+    biosdevname=0 \
+    net.ifnames=0 \
+    inst.repo=http://192.168.54.1/ftp/tree \
+    root=live:http://192.168.54.1/ftp/tree/LiveOS/squashfs.img \
+    ro rd.AUTO=1 rd_NO_LUKS LANG=en_US.UTF-8 SYSFONT=latarcyrheb-sun16 \
+    crashkernel=auto KEYBOARDTYPE=pc KEYTABLE=us 
+boot
+

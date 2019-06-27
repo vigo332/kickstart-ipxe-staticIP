@@ -1,0 +1,10 @@
+#!ipxe
+
+echo "Setting up the network interfaces"
+ifopen
+set net0/ip 192.168.56.155
+set net0/netmask 255.255.255.0
+set net0/gateway 192.168.56.254
+ifstat
+chain http://192.168.54.1/ftp/ipxe/192.168.56.155.ipxe
+
