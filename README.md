@@ -1,7 +1,7 @@
 # Using Kickstart to Remotely Upgrade RHEL 6 to RHEL 7 from HTTP server
 
 ## Background
-My business unit manages about 100 workstations running RHEL 6 server edition in different networks and buildings. We need to upgrade the OS to RHEL 7 to match our HPC system. These workstations were added by disk imaging, but they have different disk sizes, partition layouts and hardware types. Although users of the WS use network filesystems, most of the local drives were used by users.  
+My business unit manages about 100 workstations running RHEL 6 server edition in different networks and buildings. We need to upgrade the OS to RHEL 7 to match our HPC system. These workstations were added by disk imaging over time, but they have different disk sizes, partition layouts and hardware types. Although users of the WS use network filesystems, most of the local drives were used by users.
 
 The upgrade requirements:
 
@@ -9,14 +9,14 @@ The upgrade requirements:
 + Very limited time window for the workstations, only 2 days. So the upgrade needs to be performed in parallel. Ideally, with careful preparasion, rebooting the RHEL6 servers will automatically install the RHEL7 OS from network.
 + Upgrade procedure needs to be generic to handle different hardware types include Dell Precision workstations with 1 TB HDD, Lenovo Thinkstation with 1 TB SSD, Intel NUC thin clients with 250 or 256 GB SSD, and Lenovo Think Tiny with 250 GB NVMe drives. 
 
-Red Hat provides in-place major versions [upgrade tool](https://access.redhat.com/solutions/637583) from RHEL 6 to 7 for only server editions except x86. However, for mass upgrade of a pool of workstation servers, we found though this tool definitely works, it is a bit troublesome dealing with yum packages. It also limits to BIOS boot, no EFI boot loader supported. Servers with UEFI boot needs to convert to BIOS boot, which needs to deal with grub and GPT. Since our servers were installed with UEFI boot, changing the booting method and boot partition is tedious and error prone. To circumvent these problems, we go with kickstart installation with [iPXE](http://ipxe.org/) over the network because this allows lots of customizations.
+Red Hat provides in-place major versions [upgrade tool](https://access.redhat.com/solutions/637583) from RHEL 6 to 7 for only server editions except x86. However, for mass upgrade of a pool of workstation servers, we found though this tool definitely works, it is a bit troublesome dealing with yum packages. It also limits to BIOS boot, no EFI boot loader supported. Servers with UEFI boot needs to convert to BIOS boot, which needs to deal with grub and GPT. Since our servers were installed with UEFI boot, changing the booting method and boot partition is tedious and error prone. We don't even want to physical touch the servers, everything must be done remotely. To circumvent these problems, we go with kickstart installation with [iPXE](http://ipxe.org/) over the network because this allows lots of customizations.
 
 
 ## Solution in High Level
 
 Hardware requirement: the BIOS of the machines need to support UEFI boot and hence PXE/iPXE. This is normally supported by commodity hardwares which are not very old. 
 
-+ The RHEL6 system will first boot into a customized iPXE binary. This could be done by placing the iPXE binary, eg. ipxe.efi in the /boot/ directory (Note /boot and /boot/efi are mounted from different partitions, say hd0,1 and hd0,0, respectively if there is only one hard drive). The default boot sequence of the /etc/efi/EFI/redhat/grub.conf will be changed to the iPXE entry so that rebooting will start the iPXE efi to chainload the network kernel. 
++ The RHEL6 system will first boot into a customized iPXE binary. This could be done by placing the iPXE binary, eg. ipxe.efi in the /boot/efi/EFI/redhat directory (Note /boot and /boot/efi are mounted from different partitions, say hd0,1 and hd0,0, respectively if there is only one hard drive). The default boot sequence of the /etc/efi/EFI/redhat/grub.conf will be changed to the iPXE entry so that rebooting will start the iPXE efi to chainload the network kernel. 
 
 + The ipxe.efi binary needs to be prebuilt with an EMBED script setting the network for the iPXE environment. 
 
@@ -30,8 +30,6 @@ Note: Since we are installing the OS from network remotely, it is crucial to mak
 3. The network needs to be specified as arguments for the RHEL7 kernel on http server,
 4. The kickstart file needs to set the network to grab packages from repository on the http server.
 All the IPs, MAC addresses could be obtained before the upgrade, and will be used to customize the ipxe and kickstart files by scripting.
-
-### Note: The following steps are recovered from memory after 6 months, may contain syntax errors. Use with caution. 
 
 
 ## Step by step
