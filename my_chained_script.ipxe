@@ -4,7 +4,7 @@ echo Setting up the network interfaces
 ifopen
 
 echo Setting eth0 on the first network interface
-set net0/ip 192.168.56.155
+set net0/ip 192.168.56.15
 set net0/netmask 255.255.255.0
 set net0/gateway 192.168.56.254
 
@@ -18,9 +18,9 @@ echo Downloading image and kernel for chainloading from http://192.168.54.1/ftp/
 initrd http://192.168.54.1/ftp/tree/isolinux/initrd.img
 kernel http://192.168.54.1/ftp/tree/isolinux/vmlinuz \
     initrd=initrd.img \
-    inst.ks=http://192.168.54.1/ftp/ks_files/192.168.56.155.ks.cfg \
-    ip=192.168.56.155::192.168.56.254:255.255.255.0:myws155:ens4f0:none:8192 \
-    ifname=eth0:AB:CD:EF:12:34:56 \
+    inst.ks=http://192.168.54.1/ftp/ks_files/192.168.56.15.ks.cfg \
+    ip=192.168.56.15::192.168.56.254:255.255.255.0:myws155:bootnet:none:8192 \
+    ifname=bootnet:AB:CD:EF:12:34:56 \
     biosdevname=0 \
     net.ifnames=0 \
     inst.repo=http://192.168.54.1/ftp/tree \
