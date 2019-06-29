@@ -74,7 +74,14 @@ Note: the template files used below can all be customized for mass clients using
 6. Prepare the chainloader ipxe script, see my_chained_script.ipxe for template.
 
 7. Prepare the kickstart file for each workstation, see my_kickstart.ks.cfg. 
-   Note that the `--noformat --useexisting` flags to preserve the existing partitions and logvols.
+
+   Several notes:
+
+   * The network in the kickstart.ks.cfg does not need to be set since it was set as the kernel cmdline arguments in the chained script. The ifcfg-ifname file will be written during kickstart by the kernel. To have persistent network after kickstart, bring this interface up in the post script. 
+
+   * We disabled RHEL [consistent network device naming](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/ch-consistent_network_device_naming) using `biosdevname=0` and `net.ifnames=0`. In this case, the IP address of the target server needs always be binded to the MAC address, and this can be collected before kickstart. 
+
+   * Also the partition table should also be queried before kickstart so that the kickstart.cfg file can use the existing partitions, volume groups and LVMs (lsblk -bl). Use the `--useexisting --noformat` flags to preserve the existing partitions and logvols (eg, home and /shared, / needs to be purged.). Since all the workstations have the same LVM names but just varying sizes, the numbers, vgname and logvol can be `sed`ed.
 
 
 
